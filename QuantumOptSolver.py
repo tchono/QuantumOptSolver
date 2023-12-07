@@ -340,6 +340,7 @@ def view_mockup():
             ax.set_title('栄養素比較')
 
             with colB:
+                st.write(best_menu)
                 colBA, colBB = st.columns([1, 3])
                 for v in unique_vals:
                     with colBA:
