@@ -8,7 +8,7 @@ import numpy as np
 import pandas as pd
 
 ### 自作のモジュールをインポートする ###
-#from modules import VRProblem
+from modules import VRProblem
 
 # CSSの設定をする関数
 def set_font_style():
@@ -198,6 +198,10 @@ def view_mockup():
             selected_districts[district] = checkbox
 
         if button_pressed:
+            VRProblem.set_api_key(txt_apikey)
+            best_tour = VRProblem.find_best_tour(data, 3)
+
+            '''
             ind2coord = {0: (139.1257139, 37.9421493),
              1: (139.0132897, 37.91213966),
              2: (139.0252257, 37.916064),
@@ -237,15 +241,16 @@ def view_mockup():
                 2: np.array([0, 8, 12, 18, 9, 17, 31, 22, 30, 28, 0]),
                 3: np.array([0, 26, 24, 23, 29, 27, 21, 0])
             }
+            '''
         else:
-            selected_data = df_data[df_data['District'].isin([district for district, selected in selected_districts.items() if selected])]
-            ind2coord = pd.concat([df_base, selected_data]).reset_index(drop=True).apply(lambda row: (row[3], row[2]), axis=1).to_dict()
             best_tour = None
 
+        selected_data = df_data[df_data['District'].isin([district for district, selected in selected_districts.items() if selected])]
+        ind2coord = pd.concat([df_base, selected_data]).reset_index(drop=True).apply(lambda row: (row[3], row[2]), axis=1).to_dict()
         map_ = plot_solution(ind2coord, "title", best_tour)
         html_map = folium.Figure().add_child(map_).render()
 
-        st.write(f'配送先：{len(ind2coord)}件')
+        st.write(f'配送先：{len(ind2coord)-1}件')
         st.components.v1.html(html_map, height=500)
 
     if menu.index(choice) == 2:
@@ -263,18 +268,23 @@ def view_mockup():
         st.write('などがあります。')
         st.markdown("---")
 
-        colA, colB = st.columns([3, 1])
+        num_cols = 4
+        colsA = st.columns(num_cols)
+
         min_values = [10, 0, 0, 0]
         max_values = [2000, 100, 30, 30]
-        # スライダーを表示
-        with colA:
-            calorie_value = st.slider('カロリー (kcal)', min_values[0], max_values[0], 700)
-            protein_value = st.slider('たんぱく質 (g)', min_values[1], max_values[1], 30)
-            vitamin_c_value = st.slider('ビタミンC (mg)', min_values[2], max_values[2], 10)
-            iron_value = st.slider('鉄 (mg)', min_values[3], max_values[3], 10)
-        with colB:
-            # 実行ボタンを追加
-            button_pressed = st.button('✔RUN')
+
+        for col_index in range(num_cols):
+            with colsA[col_index]:
+                if col_index == 0:
+                    calorie_value = st.slider('カロリー (kcal)', min_values[0], max_values[0], 700)
+                elif col_index == 1:
+                    protein_value = st.slider('たんぱく質 (g)', min_values[1], max_values[1], 30)
+                elif col_index == 2:
+                    vitamin_c_value = st.slider('ビタミンC (mg)', min_values[2], max_values[2], 10)
+                elif col_index == 3:
+                    iron_value = st.slider('鉄 (mg)', min_values[3], max_values[3], 10)
+                    button_pressed = st.button('✔RUN')
 
         df_read = pd.read_csv("menu_data.csv")
         unique_vals = df_read['データ区分'].unique()
@@ -293,11 +303,7 @@ def view_mockup():
                 selected_row = df_read[(df_read['データ区分']==val) & (df_read['料理名']==selected_dish)]
 
                 # 選択されたデータの栄養素を表示
-                st.write(selected_row.transpose()[1:])
-                st.write(f"カロリー (kcal): {selected_row['カロリー (kcal)'].values[0]}")
-                st.write(f"たんぱく質 (g): {selected_row['たんぱく質 (g)'].values[0]}")
-                st.write(f"ビタミンC (mg): {selected_row['ビタミンC (mg)'].values[0]}")
-                st.write(f"鉄 (mg): {selected_row['鉄 (mg)'].values[0]}")
+                st.write(selected_row.transpose()[2:])
 
                 # 各栄養素の合計に追加
                 total_calories += selected_row['カロリー (kcal)'].values[0]
@@ -306,10 +312,8 @@ def view_mockup():
                 total_iron += selected_row['鉄 (mg)'].values[0]
 
         st.markdown("---")
-        st.write(f"合計 カロリー (kcal): {total_calories}")
-        st.write(f"合計 たんぱく質 (g): {total_protein}")
-        st.write(f"合計 ビタミンC (mg): {total_vitamin_c}")
-        st.write(f"合計 鉄 (mg): {total_iron}")
+        st.write("■ 合計 ■")
+        st.write(f"カロリー (kcal): {total_calories}, たんぱく質 (g): {total_protein}, ビタミンC (mg): {total_vitamin_c}, 鉄 (mg): {total_iron}")
 
         labels = ['カロリー', 'たんぱく質', 'ビタミンC', '鉄']
         selected_data = [total_calories, total_protein, total_vitamin_c, total_iron]
