@@ -278,8 +278,6 @@ def view_mockup():
         if button_pressed:
             MOProblem.set_api_key(txt_apikey)
             best_menu = MOProblem.find_best_menu(df_read, goal_data)
-            indices = np.where(best_menu == 1)[0]
-            best_menu = df_read.iloc[indices]
         else:
             best_menu = None
 
@@ -340,8 +338,6 @@ def view_mockup():
             ax.set_title('栄養素比較')
 
             with colB:
-                st.write(best_menu)
-                st.write(selected_rows)
                 colBA, colBB = st.columns([1, 3])
                 for v in unique_vals:
                     with colBA:
