@@ -323,20 +323,10 @@ def view_mockup():
 
         if not best_menu is None:
             indices = np.where(best_menu == 1)[0]
-            st.write("best_menu:", best_menu)
-            st.write("Indices:", indices)
-            st.write("data:", data)
-            st.write("data.iloc[indices]:", data.iloc[indices])
-            selected_rows = data.iloc[indices]
-            st.write('c')
-            st.write(selected_rows)
-            st.write(selected_rows)
+            selected_rows = df_read.iloc[indices]
             selected_rows_sum = selected_rows.iloc[:, 2:].sum()
-            st.write(selected_rows_sum)
             selected_data = [selected_rows_sum[0], selected_rows_sum[1], selected_rows_sum[2], selected_rows_sum[3]]
-            st.write(selected_data)
             data2 = normalize_data(selected_data, max_values) + [selected_data[0] / max_values[0]]
-            st.write(data2)
 
             plt.figure()
             ax = plt.subplot(111, polar=True)
