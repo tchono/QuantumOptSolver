@@ -202,7 +202,7 @@ def view_mockup():
 
         if button_pressed:
             VRProblem.set_api_key(txt_apikey)
-            best_tour = VRProblem.find_best_tour(selected_data, selected_value)
+            best_tour = VRProblem.find_best_tour(selected_data[['Longitude', 'Latitude']].values.tolist(), selected_value)
 
             '''
             ind2coord = {0: (139.1257139, 37.9421493),
