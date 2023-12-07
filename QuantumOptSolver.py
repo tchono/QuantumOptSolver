@@ -9,6 +9,7 @@ import pandas as pd
 
 ### 自作のモジュールをインポートする ###
 from modules import VRProblem
+from modules import MOProblem
 
 # CSSの設定をする関数
 def set_font_style():
@@ -203,48 +204,6 @@ def view_mockup():
         if button_pressed:
             VRProblem.set_api_key(txt_apikey)
             best_tour = VRProblem.find_best_tour(selected_data[['Longitude', 'Latitude']].values.tolist(), selected_value)
-
-            '''
-            ind2coord = {0: (139.1257139, 37.9421493),
-             1: (139.0132897, 37.91213966),
-             2: (139.0252257, 37.916064),
-             3: (139.0316096, 37.9152699),
-             4: (139.042371, 37.91432293),
-             5: (139.0399173, 37.92395128),
-             6: (139.049079, 37.935616),
-             7: (139.0650007, 37.91721818),
-             8: (139.0737316, 37.91603945),
-             9: (139.0715896, 37.88928017),
-             10: (139.044237, 37.90275993),
-             11: (139.0186776, 37.88349631),
-             12: (139.0686038, 37.9114295),
-             13: (139.0437186, 37.89248784),
-             14: (139.0112291, 37.90186835),
-             15: (139.0503463, 37.91341667),
-             16: (139.0313033, 37.89557017),
-             17: (139.0792831, 37.89194292),
-             18: (139.0600418, 37.89862968),
-             19: (139.0359703, 37.925097),
-             20: (139.0734401, 37.94018564),
-             21: (139.1197372, 37.92467675),
-             22: (139.1008652, 37.90289282),
-             23: (139.0863825, 37.9158178),
-             24: (139.0910009, 37.93430489),
-             25: (139.0785557, 37.94307354),
-             26: (139.1160849, 37.94408186),
-             27: (139.098454, 37.9186991),
-             28: (139.1194044, 37.90466903),
-             29: (139.0894125, 37.91099187),
-             30: (139.1058765, 37.89581331),
-             31: (139.0839817, 37.90391173)}
-
-            best_tour = {
-                0: np.array([0, 7, 15, 4, 5, 19, 6, 20, 25, 0]),
-                1: np.array([0, 10, 13, 16, 11, 14, 1, 2, 3, 0]),
-                2: np.array([0, 8, 12, 18, 9, 17, 31, 22, 30, 28, 0]),
-                3: np.array([0, 26, 24, 23, 29, 27, 21, 0])
-            }
-            '''
         else:
             best_tour = None
 
@@ -297,11 +256,12 @@ def view_mockup():
         total_vitamin_c = 0
         total_iron = 0
 
+        selected_dish = {}
         for i, val in enumerate(unique_vals):
             col_index = i % num_cols
             with cols[i // num_cols][col_index]:
-                selected_dish = st.selectbox(f'{val}を選択してください:', df_read[df_read['データ区分']==val]['料理名'])
-                selected_row = df_read[(df_read['データ区分']==val) & (df_read['料理名']==selected_dish)]
+                selected_dish[val] = st.selectbox(f'{val}を選択してください:', df_read[df_read['データ区分']==val]['料理名'])
+                selected_row = df_read[(df_read['データ区分']==val) & (df_read['料理名']==selected_dish[val])]
 
                 # 選択されたデータの栄養素を表示
                 st.write(selected_row.transpose()[2:])
@@ -312,13 +272,19 @@ def view_mockup():
                 total_vitamin_c += selected_row['ビタミンC (mg)'].values[0]
                 total_iron += selected_row['鉄 (mg)'].values[0]
 
-        st.markdown("---")
-        st.write("■ 合計 ■")
-        st.write(f"カロリー (kcal): {total_calories}, たんぱく質 (g): {total_protein}, ビタミンC (mg): {total_vitamin_c}, 鉄 (mg): {total_iron}")
-
-        labels = ['カロリー', 'たんぱく質', 'ビタミンC', '鉄']
         selected_data = [total_calories, total_protein, total_vitamin_c, total_iron]
         goal_data = [calorie_value, protein_value, vitamin_c_value, iron_value]
+
+        if button_pressed:
+            MOProblem.set_api_key(txt_apikey)
+            best_menu = MOProblem.find_best_menu(df_read, goal_data)
+            indices = np.where(best_menu == 1)[0]
+            best_menu = df_read.iloc[indices]
+        else:
+            best_menu = None
+
+        st.markdown("---")
+        labels = ['カロリー', 'たんぱく質', 'ビタミンC', '鉄']
 
         def normalize_data(data, max_values):
             return [d / max_val for d, max_val in zip(data, max_values)]
@@ -326,12 +292,12 @@ def view_mockup():
         # レーダーチャートの描画
         angles = np.linspace(0, 2 * np.pi, len(labels), endpoint=False).tolist()
         data = normalize_data(selected_data, max_values) + [selected_data[0] / max_values[0]]
-        goal_data = normalize_data(goal_data, max_values) + [goal_data[0] / max_values[0]]
+        g_data = normalize_data(goal_data, max_values) + [goal_data[0] / max_values[0]]
         angles += angles[:1]
 
         ax = plt.subplot(111, polar=True)
         ax.fill(angles, data, color='blue', alpha=0.25)
-        ax.plot(angles, goal_data, color='red', linewidth=2)  # 目標値を追加
+        ax.plot(angles, g_data, color='red', linewidth=2)  # 目標値を追加
         ax.set_yticklabels([])
         ax.set_xticks(angles[:-1])
         ax.set_xticklabels(labels)
@@ -339,16 +305,53 @@ def view_mockup():
         # タイトルを設定
         ax.set_title('栄養素比較')
 
-        # レーダーチャートを表示
-        st.pyplot(plt)
+        colA, colB = st.columns([1, 1])
+        # スライダーを表示
+        with colA:
+            colAA, colAB = st.columns([1, 3])
+            for v in unique_vals:
+                with colAA:
+                    st.write(f'{v} ：')
+                with colAB:
+                    st.write(selected_dish[v])
+            st.write("■ 合計 ■")
+            st.write(f"カロリー (kcal): {total_calories} / {goal_data[0]}")
+            st.write(f"たんぱく質 (g): {total_protein} / {goal_data[1]}")
+            st.write(f"ビタミンC (mg): {total_vitamin_c} / {goal_data[2]}")
+            st.write(f"鉄 (mg): {total_iron} / {goal_data[3]}")
 
-        if button_pressed:
-            # ボタンがクリックされた場合の処理をここに追加
-            st.write("Button Pressed!")
-            st.write("Calorie Value:", calorie_value)
-            st.write("Protein Value:", protein_value)
-            st.write("Vitamin C Value:", vitamin_c_value)
-            st.write("Iron Value:", iron_value)
+        if best_menu:
+            indices = np.where(best_menu == 1)[0]
+            selected_rows = data.iloc[indices]
+            selected_rows_sum = selected_rows.iloc[:, 2:].sum()
+            selected_data = [selected_rows_sum[0], selected_rows_sum[1], selected_rows_sum[2], selected_rows_sum[3]]
+
+            data2 = normalize_data(selected_data, max_values) + [selected_data[0] / max_values[0]]
+
+            plt.figure()
+            ax = plt.subplot(111, polar=True)
+            ax.fill(angles, data2, color='blue', alpha=0.25)
+            ax.plot(angles, g_data, color='red', linewidth=2)  # 目標値を追加
+            ax.set_yticklabels([])
+            ax.set_xticks(angles[:-1])
+            ax.set_xticklabels(labels)
+
+            # タイトルを設定
+            ax.set_title('栄養素比較')
+
+            with colB:
+                colBA, colBB = st.columns([1, 3])
+                for v in unique_vals:
+                    with colBA:
+                        st.write(f'{v} ：')
+                    with colBB:
+                        st.write(selected_rows[selected_rows['データ区分'] == v]['料理名'].values[0])
+                st.pyplot(plt)
+                st.write("■ 合計 ■")
+                st.write(f"カロリー (kcal): {total_calories} / {goal_data[0]}")
+                st.write(f"たんぱく質 (g): {total_protein} / {goal_data[1]}")
+                st.write(f"ビタミンC (mg): {total_vitamin_c} / {goal_data[2]}")
+                st.write(f"鉄 (mg): {total_iron} / {goal_data[3]}")
 
 
 

@@ -1,5 +1,4 @@
 from amplify import BinarySymbolGenerator
-from amplify import BinaryPoly
 from amplify.constraint import one_hot, less_equal
 from amplify import einsum
 from amplify import sum_poly
@@ -147,12 +146,12 @@ def find_best_tour(data, nvehicle):
     distance_matrix = gen_distance_matrix(data)
 
     # 各都市における配送需要（重量）を乱数で決定
-    # 50固定
+    # 1固定
     # demand = np.random.randint(50, 100, size=ncity)
-    demand = np.array([50] * ncity)
+    demand = np.array([1] * ncity)
     demand[0] = 0
 
-    capacity = int((sum(demand) / nvehicle) * 1.1)
+    capacity = int((sum(demand) / nvehicle) * 1.2)
 
     x, model = make_opt_model(capacity, demand, dimension, nvehicle, distance_matrix)
     solver = Solver(client)
