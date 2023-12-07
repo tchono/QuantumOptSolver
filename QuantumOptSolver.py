@@ -277,9 +277,7 @@ def view_mockup():
 
         if button_pressed:
             MOProblem.set_api_key(txt_apikey)
-            st.write(txt_apikey)
             best_menu = MOProblem.find_best_menu(df_read, goal_data)
-            st.write(best_menu)
             indices = np.where(best_menu == 1)[0]
             best_menu = df_read.iloc[indices]
         else:
@@ -323,7 +321,7 @@ def view_mockup():
             st.write(f"ビタミンC (mg): {total_vitamin_c} / {goal_data[2]}")
             st.write(f"鉄 (mg): {total_iron} / {goal_data[3]}")
 
-        if best_menu:
+        if not best_menu is None:
             st.write(best_menu)
             indices = np.where(best_menu == 1)[0]
             selected_rows = data.iloc[indices]
