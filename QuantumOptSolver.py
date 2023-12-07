@@ -321,12 +321,16 @@ def view_mockup():
             st.write(f"鉄 (mg): {total_iron} / {goal_data[3]}")
 
         if best_menu:
+            st.write(best_menu)
             indices = np.where(best_menu == 1)[0]
             selected_rows = data.iloc[indices]
+            st.write(selected_rows)
             selected_rows_sum = selected_rows.iloc[:, 2:].sum()
+            st.write(selected_rows_sum)
             selected_data = [selected_rows_sum[0], selected_rows_sum[1], selected_rows_sum[2], selected_rows_sum[3]]
-
+            st.write(selected_data)
             data2 = normalize_data(selected_data, max_values) + [selected_data[0] / max_values[0]]
+            st.write(data2)
 
             plt.figure()
             ax = plt.subplot(111, polar=True)
