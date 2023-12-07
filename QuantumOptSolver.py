@@ -277,7 +277,9 @@ def view_mockup():
 
         if button_pressed:
             MOProblem.set_api_key(txt_apikey)
+            st.write(txt_apikey)
             best_menu = MOProblem.find_best_menu(df_read, goal_data)
+            st.write(best_menu)
             indices = np.where(best_menu == 1)[0]
             best_menu = df_read.iloc[indices]
         else:
@@ -314,6 +316,7 @@ def view_mockup():
                     st.write(f'{v} ：')
                 with colAB:
                     st.write(selected_dish[v])
+            st.pyplot(plt)
             st.write("■ 合計 ■")
             st.write(f"カロリー (kcal): {total_calories} / {goal_data[0]}")
             st.write(f"たんぱく質 (g): {total_protein} / {goal_data[1]}")
