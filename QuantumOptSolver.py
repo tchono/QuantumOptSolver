@@ -1,7 +1,10 @@
 ### 外部ライブラリをインポートする ###
 from lib2to3.pgen2.pgen import DFAState
 import streamlit as st
+import japanize_matplotlib
+import matplotlib.pyplot as plt
 import folium
+import numpy as np
 import pandas as pd
 
 ### 自作のモジュールをインポートする ###
@@ -160,68 +163,188 @@ def view_mockup():
         st.write('このデモで取り扱う容量制約付き運搬経路問題は、上記運搬経路問題に各車両の積載上限が追加された問題です。つまり、各配送車両は積載量制約を満たした上で配送を行う必要があります。')
         st.write('今回は配送拠点(デポ)が一つかつ、各需要地の需要と車の容量が整数値のみを取るような場合を考えます。')
         st.write('運搬経路問題の具体的な応用先として、')
-        st.write('郵便などの運送業における効率的な配送計画の策定')
-        st.write('ごみ収集や道路清掃における訪問順序の決定')
+        st.write('・　郵便などの運送業における効率的な配送計画の策定')
+        st.write('・　ごみ収集や道路清掃における訪問順序の決定')
         st.write('などがあります。')
         st.markdown("---")
 
-        df = st.sidebar.file_uploader("データをアップロードしてください", type=["csv"])
-
+        colA, colB = st.columns([3, 1])
         # スライダーを表示
-        selected_value = st.sidebar.slider('車の台数を選択してください', 1, 5, 3)
+        with colA:
+            selected_value = st.slider('車の台数を選択してください', 1, 5, 3)
+        with colB:
+            # 実行ボタンを追加
+            button_pressed = st.button('✔RUN')
 
-        if df is not None:
-            # アップロードされたファイルを直接読み込む
-            df_read = pd.read_csv(df)
-            df_base = df_read.iloc[0:1]
-            df_data = df_read.iloc[1:]
-            unique_districts = df_data['District'].unique()
+        df_read = pd.read_csv("pos_data.csv")
+        df_base = df_read.iloc[0:1]
+        df_data = df_read.iloc[1:]
+        unique_districts = df_data['District'].unique()
 
-            col1, col2 = st.sidebar.columns(2)
-            selected_districts = {}
-            count = 0
-            for i, district in enumerate(unique_districts):
-                c = df_data[df_data['District'] == district].shape[0]
-                count += c
-                label = f"{district} ({c}件)"
-                # 2列目までにチェックボックスを配置
-                if i % 2 == 0:
-                    checkbox = col1.checkbox(label)
-                else:
-                    checkbox = col2.checkbox(label)
-                selected_districts[district] = checkbox
+        col1, col2, col3, col4 = st.columns(4)
+        selected_districts = {}
+        for i, district in enumerate(unique_districts):
+            count = df_data[df_data['District'] == district].shape[0]
+            label = f"{district} ({count}件)"
+            # 2列目までにチェックボックスを配置
+            if i % 4 == 0:
+                checkbox = col1.checkbox(label)
+            elif i % 4 == 1:
+                checkbox = col2.checkbox(label)
+            elif i % 4 == 2:
+                checkbox = col3.checkbox(label)
+            else:
+                checkbox = col4.checkbox(label)
+            selected_districts[district] = checkbox
 
+        if button_pressed:
+            ind2coord = {0: (139.1257139, 37.9421493),
+             1: (139.0132897, 37.91213966),
+             2: (139.0252257, 37.916064),
+             3: (139.0316096, 37.9152699),
+             4: (139.042371, 37.91432293),
+             5: (139.0399173, 37.92395128),
+             6: (139.049079, 37.935616),
+             7: (139.0650007, 37.91721818),
+             8: (139.0737316, 37.91603945),
+             9: (139.0715896, 37.88928017),
+             10: (139.044237, 37.90275993),
+             11: (139.0186776, 37.88349631),
+             12: (139.0686038, 37.9114295),
+             13: (139.0437186, 37.89248784),
+             14: (139.0112291, 37.90186835),
+             15: (139.0503463, 37.91341667),
+             16: (139.0313033, 37.89557017),
+             17: (139.0792831, 37.89194292),
+             18: (139.0600418, 37.89862968),
+             19: (139.0359703, 37.925097),
+             20: (139.0734401, 37.94018564),
+             21: (139.1197372, 37.92467675),
+             22: (139.1008652, 37.90289282),
+             23: (139.0863825, 37.9158178),
+             24: (139.0910009, 37.93430489),
+             25: (139.0785557, 37.94307354),
+             26: (139.1160849, 37.94408186),
+             27: (139.098454, 37.9186991),
+             28: (139.1194044, 37.90466903),
+             29: (139.0894125, 37.91099187),
+             30: (139.1058765, 37.89581331),
+             31: (139.0839817, 37.90391173)}
+
+            best_tour = {
+                0: np.array([0, 7, 15, 4, 5, 19, 6, 20, 25, 0]),
+                1: np.array([0, 10, 13, 16, 11, 14, 1, 2, 3, 0]),
+                2: np.array([0, 8, 12, 18, 9, 17, 31, 22, 30, 28, 0]),
+                3: np.array([0, 26, 24, 23, 29, 27, 21, 0])
+            }
+        else:
             selected_data = df_data[df_data['District'].isin([district for district, selected in selected_districts.items() if selected])]
             ind2coord = pd.concat([df_base, selected_data]).reset_index(drop=True).apply(lambda row: (row[3], row[2]), axis=1).to_dict()
-            map_ = plot_solution(ind2coord, "title", None)
-            html_map = folium.Figure().add_child(map_).render()
+            best_tour = None
 
-            st.write(f'車の台数：{selected_value}件')
-            st.write(f'配送先：{len(ind2coord)}件')
-            st.components.v1.html(html_map, height=500)
+        map_ = plot_solution(ind2coord, "title", best_tour)
+        html_map = folium.Figure().add_child(map_).render()
 
-
-        # 実行ボタンを追加
-        if st.sidebar.button('✔RUN'):
-            # ボタンがクリックされた場合の処理をここに追加
-            st.sidebar.write('選択された値:', selected_value)
-
-            selected_data = df_data[df_data['District'].isin([district for district, selected in selected_districts.items() if selected])]
-            ind2coord = selected_data.reset_index(drop=True).apply(lambda row: (row[3], row[2]), axis=1).to_dict()
-            map_ = plot_solution(ind2coord, "title", None)
-            html_map = folium.Figure().add_child(map_).render()
-
-            st.components.v1.html(html_map, height=500)
-            st.write("map_の中身:", map_)
+        st.write(f'配送先：{len(ind2coord)}件')
+        st.components.v1.html(html_map, height=500)
 
     if menu.index(choice) == 2:
-        # スライダーを表示
-        selected_value = st.sidebar.slider('車の台数を選択してください', 1, 5, 3)
+        st.title('献立最適化問題')
+        # 画像のパス
+        image_path = "assets/image/MenuOptimization.png"
+        # 画像を表示
+        st.image(image_path, use_column_width=True)
+        st.write('献立最適化問題とは、特定の制約や要求に基づいて、最も効率的かつ栄養価の高い食事を計画することを目的とした問題です。より具体的には、目標となる栄養素の必要量を満たす献立の組み合わせを決定します。')
+        st.write('このデモで取り扱う献立最適化問題は、バランスの取れた食事を実現するための最適な組み合わせを見つけることに焦点を当てています。')
+        st.write('献立最適化問題の具体的な応用先として、')
+        st.write('・　家庭や学校の食事計画で、予算内で栄養バランスのとれたメニューの作成')
+        st.write('・　特定の健康上の制約（例えば、糖尿病や高血圧など）を持つ人々のための個別の食事計画')
+        st.write('・　顧客の好みや季節に応じた献立の提案')
+        st.write('などがあります。')
+        st.markdown("---")
 
-        # 実行ボタンを追加
-        if st.sidebar.button('✔RUN'):
+        colA, colB = st.columns([3, 1])
+        min_values = [10, 0, 0, 0]
+        max_values = [2000, 100, 30, 30]
+        # スライダーを表示
+        with colA:
+            calorie_value = st.slider('カロリー (kcal)', min_values[0], max_values[0], 700)
+            protein_value = st.slider('たんぱく質 (g)', min_values[1], max_values[1], 30)
+            vitamin_c_value = st.slider('ビタミンC (mg)', min_values[2], max_values[2], 10)
+            iron_value = st.slider('鉄 (mg)', min_values[3], max_values[3], 10)
+        with colB:
+            # 実行ボタンを追加
+            button_pressed = st.button('✔RUN')
+
+        df_read = pd.read_csv("menu_data.csv")
+        unique_vals = df_read['データ区分'].unique()
+        num_cols = len(unique_vals)
+        cols = [st.columns(num_cols) for _ in range((len(unique_vals) + num_cols - 1) // num_cols)]
+        # 各栄養素の合計を初期化
+        total_calories = 0
+        total_protein = 0
+        total_vitamin_c = 0
+        total_iron = 0
+
+        for i, val in enumerate(unique_vals):
+            col_index = i % num_cols
+            with cols[i // num_cols][col_index]:
+                selected_dish = st.selectbox(f'{val}を選択してください:', df_read[df_read['データ区分']==val]['料理名'])
+                selected_row = df_read[(df_read['データ区分']==val) & (df_read['料理名']==selected_dish)]
+
+                # 選択されたデータの栄養素を表示
+                st.write(selected_row.transpose()[1:])
+                st.write(f"カロリー (kcal): {selected_row['カロリー (kcal)'].values[0]}")
+                st.write(f"たんぱく質 (g): {selected_row['たんぱく質 (g)'].values[0]}")
+                st.write(f"ビタミンC (mg): {selected_row['ビタミンC (mg)'].values[0]}")
+                st.write(f"鉄 (mg): {selected_row['鉄 (mg)'].values[0]}")
+
+                # 各栄養素の合計に追加
+                total_calories += selected_row['カロリー (kcal)'].values[0]
+                total_protein += selected_row['たんぱく質 (g)'].values[0]
+                total_vitamin_c += selected_row['ビタミンC (mg)'].values[0]
+                total_iron += selected_row['鉄 (mg)'].values[0]
+
+        st.markdown("---")
+        st.write(f"合計 カロリー (kcal): {total_calories}")
+        st.write(f"合計 たんぱく質 (g): {total_protein}")
+        st.write(f"合計 ビタミンC (mg): {total_vitamin_c}")
+        st.write(f"合計 鉄 (mg): {total_iron}")
+
+        labels = ['カロリー', 'たんぱく質', 'ビタミンC', '鉄']
+        selected_data = [total_calories, total_protein, total_vitamin_c, total_iron]
+        goal_data = [calorie_value, protein_value, vitamin_c_value, iron_value]
+
+        def normalize_data(data, max_values):
+            return [d / max_val for d, max_val in zip(data, max_values)]
+
+        # レーダーチャートの描画
+        angles = np.linspace(0, 2 * np.pi, len(labels), endpoint=False).tolist()
+        data = normalize_data(selected_data, max_values) + [selected_data[0] / max_values[0]]
+        goal_data = normalize_data(goal_data, max_values) + [goal_data[0] / max_values[0]]
+        angles += angles[:1]
+
+        ax = plt.subplot(111, polar=True)
+        ax.fill(angles, data, color='blue', alpha=0.25)
+        ax.plot(angles, goal_data, color='red', linewidth=2)  # 目標値を追加
+        ax.set_yticklabels([])
+        ax.set_xticks(angles[:-1])
+        ax.set_xticklabels(labels)
+
+        # タイトルを設定
+        ax.set_title('栄養素比較')
+
+        # レーダーチャートを表示
+        st.pyplot(plt)
+
+        if button_pressed:
             # ボタンがクリックされた場合の処理をここに追加
-            st.sidebar.write('選択された値:', selected_value)
+            st.write("Button Pressed!")
+            st.write("Calorie Value:", calorie_value)
+            st.write("Protein Value:", protein_value)
+            st.write("Vitamin C Value:", vitamin_c_value)
+            st.write("Iron Value:", iron_value)
+
 
 
 #----------------------------------------------#
