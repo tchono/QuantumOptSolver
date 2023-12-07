@@ -323,9 +323,10 @@ def view_mockup():
 
         if not best_menu is None:
             indices = np.where(best_menu == 1)[0]
+            st.write("best_menu:", best_menu)
             st.write("Indices:", indices)
-            st.write("Indices:", data)
-            st.write("Indices:", data.iloc[indices])
+            st.write("data:", data)
+            st.write("data.iloc[indices]:", data.iloc[indices])
             selected_rows = data.iloc[indices]
             st.write('c')
             st.write(selected_rows)
