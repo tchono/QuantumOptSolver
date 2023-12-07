@@ -197,9 +197,12 @@ def view_mockup():
                 checkbox = col4.checkbox(label)
             selected_districts[district] = checkbox
 
+        selected_data = df_data[df_data['District'].isin([district for district, selected in selected_districts.items() if selected])]
+        ind2coord = pd.concat([df_base, selected_data]).reset_index(drop=True).apply(lambda row: (row[3], row[2]), axis=1).to_dict()
+
         if button_pressed:
             VRProblem.set_api_key(txt_apikey)
-            best_tour = VRProblem.find_best_tour(data, 3)
+            best_tour = VRProblem.find_best_tour(selected_data, selected_value)
 
             '''
             ind2coord = {0: (139.1257139, 37.9421493),
@@ -245,8 +248,6 @@ def view_mockup():
         else:
             best_tour = None
 
-        selected_data = df_data[df_data['District'].isin([district for district, selected in selected_districts.items() if selected])]
-        ind2coord = pd.concat([df_base, selected_data]).reset_index(drop=True).apply(lambda row: (row[3], row[2]), axis=1).to_dict()
         map_ = plot_solution(ind2coord, "title", best_tour)
         html_map = folium.Figure().add_child(map_).render()
 
