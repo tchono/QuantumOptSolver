@@ -322,9 +322,13 @@ def view_mockup():
             st.write(f"鉄 (mg): {total_iron} / {goal_data[3]}")
 
         if not best_menu is None:
-            st.write(best_menu)
+            st.write('a')
             indices = np.where(best_menu == 1)[0]
+            st.write("Indices:", indices)
+            st.write('b')
             selected_rows = data.iloc[indices]
+            st.write('c')
+            st.write(selected_rows)
             st.write(selected_rows)
             selected_rows_sum = selected_rows.iloc[:, 2:].sum()
             st.write(selected_rows_sum)
