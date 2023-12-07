@@ -341,6 +341,7 @@ def view_mockup():
 
             with colB:
                 st.write(best_menu)
+                st.write(selected_rows)
                 colBA, colBB = st.columns([1, 3])
                 for v in unique_vals:
                     with colBA:
