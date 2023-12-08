@@ -198,8 +198,8 @@ def view_mockup():
                 checkbox = col4.checkbox(label)
             selected_districts[district] = checkbox
 
-        selected_data = df_data[df_data['District'].isin([district for district, selected in selected_districts.items() if selected])]
-        ind2coord = pd.concat([df_base, selected_data]).reset_index(drop=True).apply(lambda row: (row[3], row[2]), axis=1).to_dict()
+        selected_data = pd.concat([df_base, df_data[df_data['District'].isin([district for district, selected in selected_districts.items() if selected])]])
+        ind2coord = selected_data.reset_index(drop=True).apply(lambda row: (row[3], row[2]), axis=1).to_dict()
 
         if button_pressed:
             VRProblem.set_api_key(txt_apikey)
@@ -346,10 +346,10 @@ def view_mockup():
                         st.write(selected_rows[selected_rows['データ区分'] == v]['料理名'].values[0])
                 st.pyplot(plt)
                 st.write("■ 合計 ■")
-                st.write(f"カロリー (kcal): {total_calories} / {goal_data[0]}")
-                st.write(f"たんぱく質 (g): {total_protein} / {goal_data[1]}")
-                st.write(f"ビタミンC (mg): {total_vitamin_c} / {goal_data[2]}")
-                st.write(f"鉄 (mg): {total_iron} / {goal_data[3]}")
+                st.write(f"カロリー (kcal): {selected_data[0]} / {goal_data[0]}")
+                st.write(f"たんぱく質 (g): {selected_data[1]} / {goal_data[1]}")
+                st.write(f"ビタミンC (mg): {selected_data[2]} / {goal_data[2]}")
+                st.write(f"鉄 (mg): {selected_data[3]} / {goal_data[3]}")
 
 
 
