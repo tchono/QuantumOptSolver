@@ -45,10 +45,10 @@ def get_model(data, goal):
     f = sum(x[i] * q3[i, j] * x[j] for i in range(num_recipe) for j in range(num_recipe))
     model = BinaryQuadraticModel(f)
 
-    return 0
+    return x, model
 
 def find_best_menu(data, goal):
-    model = get_model(data, goal)
+    x, model = get_model(data, goal)
 
     # Amplify　ソルバ取得，求解
     solver = get_solver()
