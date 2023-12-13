@@ -11,18 +11,13 @@ def set_api_key(key):
     global api_key
     api_key = key
 
-# クライアントの設定
-def create_configured_client():
-    # クライアントの設定
+def get_solver(timeout=5000):
     client = FixstarsClient()
     client.token = api_key
-    client.parameters.timeout = 5000  # タイムアウト5秒
-
-    return client
+    client.parameters.timeout = timeout
+    return Solver(client)
 
 def find_best_menu(data, goal):
-    client = create_configured_client()
-
     num_recipe = len(data)  # レシピ数
     num_nut = len(goal)  # 栄養素の種類数
     num_type = len(data['データ区分'].unique())
@@ -50,7 +45,8 @@ def find_best_menu(data, goal):
     f = sum(x[i] * q3[i, j] * x[j] for i in range(num_recipe) for j in range(num_recipe))
     model = BinaryQuadraticModel(f)
 
-    solver = Solver(client)
+    # Amplify　ソルバ取得，求解
+    solver = get_solver()
     result = solver.solve(model)
 
     if len(result.solutions) == 0:
