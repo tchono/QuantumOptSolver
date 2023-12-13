@@ -19,7 +19,7 @@ def get_solver(timeout=5000):
 
 def get_model(data, goal):
     num_recipe = len(data)  # レシピ数
-    num_nut = len()  # 栄養素の種類数
+    num_nut = len(goal)  # 栄養素の種類数
     num_type = len(data['データ区分'].unique())
 
     df = data[data.columns[1:].tolist() + [data.columns[0]]]
