@@ -321,10 +321,15 @@ def view_mockup():
 
         if not best_menu is None:
             indices = np.where(best_menu == 1)[0]
+            st.write(indices)
             selected_rows = df_read.iloc[indices]
+            st.write(selected_rows)
             selected_rows_sum = selected_rows.iloc[:, 2:].sum()
+            st.write(selected_rows_sum)
             selected_data = [selected_rows_sum[0], selected_rows_sum[1], selected_rows_sum[2], selected_rows_sum[3]]
+            st.write(selected_data)
             data2 = normalize_data(selected_data, max_values) + [selected_data[0] / max_values[0]]
+            st.write(data2)
 
             plt.figure()
             ax = plt.subplot(111, polar=True)
@@ -343,7 +348,7 @@ def view_mockup():
                     with colBA:
                         st.write(f'{row[0]} ：')
                     with colBB:
-                        st.write(selected_rows[1])
+                        st.write(row[1])
                 st.pyplot(plt)
                 st.write("■ 合計 ■")
                 st.write(f"カロリー (kcal): {selected_data[0]} / {goal_data[0]}")

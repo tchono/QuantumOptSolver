@@ -17,9 +17,9 @@ def get_solver(timeout=5000):
     client.parameters.timeout = timeout
     return Solver(client)
 
-def find_best_menu(data, goal):
+def get_model(data, goal):
     num_recipe = len(data)  # レシピ数
-    num_nut = len(goal)  # 栄養素の種類数
+    num_nut = len()  # 栄養素の種類数
     num_type = len(data['データ区分'].unique())
 
     df = data[data.columns[1:].tolist() + [data.columns[0]]]
@@ -44,6 +44,11 @@ def find_best_menu(data, goal):
     q3 = q1 + q2
     f = sum(x[i] * q3[i, j] * x[j] for i in range(num_recipe) for j in range(num_recipe))
     model = BinaryQuadraticModel(f)
+
+    return 0
+
+def find_best_menu(data, goal):
+    model = get_model(data, goal)
 
     # Amplify　ソルバ取得，求解
     solver = get_solver()
