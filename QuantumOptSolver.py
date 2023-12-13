@@ -277,7 +277,7 @@ def view_mockup():
 
         if button_pressed:
             MOProblem.set_api_key(txt_apikey)
-            best_menu = MOProblem.find_best_menu(df_read, goal_data)
+            best_menu = MOProblem.find_best_menu(df_read[:-1], goal_data)
         else:
             best_menu = None
 
@@ -344,11 +344,11 @@ def view_mockup():
 
             with colB:
                 colBA, colBB = st.columns([1, 3])
-                for row in selected_rows:
+                for i in len(selected_rows):
                     with colBA:
-                        st.write(f'{row[0]} ：')
+                        st.write(f'{selected_rows.iloc[i][0]} ：')
                     with colBB:
-                        st.write(row[1])
+                        st.write(selected_rows.iloc[i][1])
                 st.pyplot(plt)
                 st.write("■ 合計 ■")
                 st.write(f"カロリー (kcal): {selected_data[0]} / {goal_data[0]}")
