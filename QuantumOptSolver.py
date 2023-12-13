@@ -339,11 +339,11 @@ def view_mockup():
 
             with colB:
                 colBA, colBB = st.columns([1, 3])
-                for v in unique_vals:
+                for row in selected_rows:
                     with colBA:
-                        st.write(f'{v} ：')
+                        st.write(f'{row[0]} ：')
                     with colBB:
-                        st.write(selected_rows[selected_rows['データ区分'] == v]['料理名'].values[0])
+                        st.write(selected_rows[1])
                 st.pyplot(plt)
                 st.write("■ 合計 ■")
                 st.write(f"カロリー (kcal): {selected_data[0]} / {goal_data[0]}")
