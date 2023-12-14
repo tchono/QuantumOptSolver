@@ -1,4 +1,5 @@
 ### 外部ライブラリをインポートする ###
+from codecs import register_error
 from lib2to3.pgen2.pgen import DFAState
 import streamlit as st
 import japanize_matplotlib
@@ -266,7 +267,13 @@ def view_mockup():
 
         if button_pressed:
             MOProblem.set_api_key(apikey)
-            best_menu = MOProblem.find_best_menu(df_read, goal_data)
+            try:
+                best_menu = MOProblem.find_best_menu(df_read, goal_data)
+                if np.where(best_menu == 1)[0] == 0:
+                    raise RuntimeError("制約条件を満たす組み合わせは見つかりませんでした")
+            except:
+                best_menu = None
+                st.warning('制約条件を満たす組み合わせは見つかりませんでした')
         else:
             best_menu = None
 
@@ -308,9 +315,6 @@ def view_mockup():
 
         if not best_menu is None:
             indices = np.where(best_menu == 1)[0]
-            if len(indices) == 0:
-                st.warning('制約条件を満たす組み合わせは見つかりませんでした')
-                st.stop()
             selected_rows = df_read.iloc[indices]
             total_nutrients2 = selected_rows.iloc[:, 2:].sum()
             total_nutrients2 = list(total_nutrients2.values)
