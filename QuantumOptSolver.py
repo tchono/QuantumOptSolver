@@ -318,6 +318,7 @@ def view_mockup():
             st.write(data2)
 
             # レーダーチャートの描画
+            plt.figure()
             ax = plt.subplot(111, polar=True)
             ax.fill(angles, data2, color='blue', alpha=0.25)
             ax.plot(angles, g_data, color='red', linewidth=2)  # 目標値を追加
