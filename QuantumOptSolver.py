@@ -241,7 +241,7 @@ def view_mockup():
         min_values = [math.floor(val * 3) for val in df_read.iloc[:, 2:].min()]
         max_values = [math.floor(val * 3) for val in df_read.iloc[:, 2:].max()]
         num_cols = len(total_nutrients)
-        colsA = [[0] * num_cols]
+        colsA = st.columns(num_cols)
         for col_index in range(num_cols):
             with colsA[col_index]:
                 goal_data[col_index] = st.slider(labels[col_index], min_values[0], max_values[0], int(min_values[0] + ((max_values[0] + min_values[0]) / 3)))
