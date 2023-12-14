@@ -287,7 +287,6 @@ def view_mockup():
         ax.set_yticklabels([])
         ax.set_xticks(angles[:-1])
         ax.set_xticklabels(labels)
-        ax.set_thetagrids(angles[:-1] * 180 / np.pi, labels)  
         ax.set_theta_zero_location('N')
 
         # タイトルを設定
