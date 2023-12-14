@@ -234,8 +234,8 @@ def view_mockup():
         df_read = pd.read_csv("menu_data.csv")
         columns = df_read.columns
         unique_vals = df_read.iloc[:, 0].unique() # データ区分
-        total_nutrients = [0] * len(columns) - 2 # データ区分と料理名を除く
-        goal_data = [0] * len(columns) - 2
+        total_nutrients = [0] * (len(columns) - 2) # データ区分と料理名を除く
+        goal_data = [0] * (len(columns) - 2)
         labels = list(columns[2:]) # データ区分と料理名を除く
 
         min_values = [math.floor(val * 3) for val in df_read.iloc[:, 2:].min()]
@@ -302,10 +302,8 @@ def view_mockup():
                     st.write(selected_dish[v])
             st.pyplot(plt)
             st.write("■ 合計 ■")
-            st.write(f"カロリー (kcal): {total_calories} / {goal_data[0]}")
-            st.write(f"たんぱく質 (g): {total_protein} / {goal_data[1]}")
-            st.write(f"ビタミンC (mg): {total_vitamin_c} / {goal_data[2]}")
-            st.write(f"鉄 (mg): {total_iron} / {goal_data[3]}")
+            for i in range(len(labels)):
+                st.write(f"{labels[i]}: {total_nutrients[i]} / {goal_data[i]}")
 
         if not best_menu is None:
             st.write(best_menu)
