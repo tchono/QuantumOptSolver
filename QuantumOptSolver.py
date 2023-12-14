@@ -269,7 +269,7 @@ def view_mockup():
             MOProblem.set_api_key(apikey)
             try:
                 best_menu = MOProblem.find_best_menu(df_read, goal_data)
-                if np.where(best_menu == 1)[0] == 0:
+                if np.sum(np.where(best_menu == 1)[0]) == 0:
                     raise RuntimeError("制約条件を満たす組み合わせは見つかりませんでした")
             except:
                 best_menu = None
