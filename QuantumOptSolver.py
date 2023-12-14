@@ -244,7 +244,7 @@ def view_mockup():
         colsA = st.columns(num_cols)
         for col_index in range(num_cols):
             with colsA[col_index]:
-                goal_data[col_index] = st.slider(labels[col_index], min_values[0], max_values[0], int(min_values[0] + ((max_values[0] + min_values[0]) / 3)))
+                goal_data[col_index] = st.slider(labels[col_index], min_values[col_index], max_values[col_index], int(min_values[col_index] + ((max_values[col_index] + min_values[col_index]) / 3)))
                 if col_index == num_cols - 1:
                     button_pressed = st.button('✔RUN')
 
@@ -276,7 +276,7 @@ def view_mockup():
             return [d / max_val for d, max_val in zip(data, max_values)]
 
         # レーダーチャートの描画
-        angles = np.linspace(0, 2 * np.pi, len(labels), endpoint=False).tolist()
+        angles = np.linspace(np.pi / 2, (5 / 2), len(labels), endpoint=False).tolist()
         data = normalize_data(total_nutrients, max_values) + [total_nutrients[0] / max_values[0]]
         g_data = normalize_data(goal_data, max_values) + [goal_data[0] / max_values[0]]
         angles += angles[:1]
