@@ -307,25 +307,24 @@ def view_mockup():
                 st.write(f"{labels[i]}: {total_nutrients[i]} / {goal_data[i]}")
 
         if not best_menu is None:
-            st.write(best_menu)
             indices = np.where(best_menu == 1)[0]
-            st.write(indices)
+            if len(indices) == 0:
+                st.warning('制約条件を満たす組み合わせは見つかりませんでした')
+                st.stop()
             selected_rows = df_read.iloc[indices]
-            st.write(selected_rows)
-            selected_rows_sum = selected_rows.iloc[:, 2:].sum()
-            st.write(selected_rows_sum)
-            XXXXXXXXXXXXtotal_nutrients = [selected_rows_sum[0], selected_rows_sum[1], selected_rows_sum[2], selected_rows_sum[3]]
-            st.write(selected_data)
-            data2 = normalize_data(selected_data, max_values) + [selected_data[0] / max_values[0]]
+            total_nutrients2 = selected_rows.iloc[:, 2:].sum()
+            total_nutrients2 = list(total_nutrients2.values)
+            data2 = normalize_data(total_nutrients2, max_values) + [total_nutrients2[0] / max_values[0]]
             st.write(data2)
 
-            plt.figure()
+            # レーダーチャートの描画
             ax = plt.subplot(111, polar=True)
             ax.fill(angles, data2, color='blue', alpha=0.25)
             ax.plot(angles, g_data, color='red', linewidth=2)  # 目標値を追加
             ax.set_yticklabels([])
             ax.set_xticks(angles[:-1])
             ax.set_xticklabels(labels)
+            ax.set_theta_zero_location('N')
 
             # タイトルを設定
             ax.set_title('栄養素比較')
@@ -339,10 +338,8 @@ def view_mockup():
                         st.write(selected_rows.iloc[i][1])
                 st.pyplot(plt)
                 st.write("■ 合計 ■")
-                st.write(f"カロリー (kcal): {selected_data[0]} / {goal_data[0]}")
-                st.write(f"たんぱく質 (g): {selected_data[1]} / {goal_data[1]}")
-                st.write(f"ビタミンC (mg): {selected_data[2]} / {goal_data[2]}")
-                st.write(f"鉄 (mg): {selected_data[3]} / {goal_data[3]}")
+                for i in range(len(labels)):
+                    st.write(f"{labels[i]}: {total_nutrients2[i]} / {goal_data[i]}")
 
 
 
