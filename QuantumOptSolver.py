@@ -331,7 +331,7 @@ def view_mockup():
 
             with colB:
                 colBA, colBB = st.columns([1, 3])
-                for i in len(selected_rows):
+                for i in range(len(selected_rows)):
                     with colBA:
                         st.write(f'{selected_rows.iloc[i][0]} ：')
                     with colBB:
