@@ -6,6 +6,7 @@ import matplotlib.pyplot as plt
 import folium
 import numpy as np
 import pandas as pd
+import math
 
 ### 自作のモジュールをインポートする ###
 from modules import VRProblem
@@ -228,68 +229,55 @@ def view_mockup():
         st.write('などがあります。')
         st.markdown("---")
 
-        num_cols = 4
-        colsA = st.columns(num_cols)
 
-        min_values = [10, 0, 0, 0]
-        max_values = [2000, 100, 30, 30]
-
-        for col_index in range(num_cols):
-            with colsA[col_index]:
-                if col_index == 0:
-                    calorie_value = st.slider('カロリー (kcal)', min_values[0], max_values[0], 700)
-                elif col_index == 1:
-                    protein_value = st.slider('たんぱく質 (g)', min_values[1], max_values[1], 30)
-                elif col_index == 2:
-                    vitamin_c_value = st.slider('ビタミンC (mg)', min_values[2], max_values[2], 10)
-                elif col_index == 3:
-                    iron_value = st.slider('鉄 (mg)', min_values[3], max_values[3], 10)
-                    button_pressed = st.button('✔RUN')
 
         df_read = pd.read_csv("menu_data.csv")
-        unique_vals = df_read['データ区分'].unique()
+        columns = df_read.columns
+        unique_vals = df_read.iloc[:, 0].unique() # データ区分
+        total_nutrients = [0] * len(columns) - 2 # データ区分と料理名を除く
+        goal_data = [0] * len(columns) - 2
+        labels = list(columns[2:]) # データ区分と料理名を除く
+
+        min_values = [math.floor(val * 3) for val in df_read.iloc[:, 2:].min()]
+        max_values = [math.floor(val * 3) for val in df_read.iloc[:, 2:].max()]
+        num_cols = len(total_nutrients)
+        colsA = [[0] * num_cols]
+        for col_index in range(num_cols):
+            with colsA[col_index]:
+                goal_data[col_index] = st.slider(labels[col_index], min_values[0], max_values[0], int(min_values[0] + ((max_values[0] + min_values[0]) / 3)))
+                if col_index == num_cols - 1:
+                    button_pressed = st.button('✔RUN')
+
         num_cols = len(unique_vals)
         cols = [st.columns(num_cols) for _ in range((len(unique_vals) + num_cols - 1) // num_cols)]
-        # 各栄養素の合計を初期化
-        total_calories = 0
-        total_protein = 0
-        total_vitamin_c = 0
-        total_iron = 0
-
         selected_dish = {}
         for i, val in enumerate(unique_vals):
             col_index = i % num_cols
             with cols[i // num_cols][col_index]:
-                selected_dish[val] = st.selectbox(f'{val}を選択してください:', df_read[df_read['データ区分']==val]['料理名'])
-                selected_row = df_read[(df_read['データ区分']==val) & (df_read['料理名']==selected_dish[val])]
+                selected_dish[val] = st.selectbox(f'{val}を選択してください:', df_read[df_read.iloc[:, 0]==val].iloc[:, 1])
+                selected_row = df_read[(df_read.iloc[:, 0]==val) & (df_read.iloc[:, 1]==selected_dish[val])]
 
                 # 選択されたデータの栄養素を表示
                 st.write(selected_row.transpose()[2:])
 
                 # 各栄養素の合計に追加
-                total_calories += selected_row['カロリー (kcal)'].values[0]
-                total_protein += selected_row['たんぱく質 (g)'].values[0]
-                total_vitamin_c += selected_row['ビタミンC (mg)'].values[0]
-                total_iron += selected_row['鉄 (mg)'].values[0]
-
-        selected_data = [total_calories, total_protein, total_vitamin_c, total_iron]
-        goal_data = [calorie_value, protein_value, vitamin_c_value, iron_value]
+                for i in range(len(total_nutrients)):
+                    total_nutrients[i] += selected_row.iloc[0, i + 2]
 
         if button_pressed:
             MOProblem.set_api_key(apikey)
-            best_menu = MOProblem.find_best_menu(df_read[:-1], goal_data)
+            best_menu = MOProblem.find_best_menu(df_read, goal_data)
         else:
             best_menu = None
 
         st.markdown("---")
-        labels = ['カロリー', 'たんぱく質', 'ビタミンC', '鉄']
 
         def normalize_data(data, max_values):
             return [d / max_val for d, max_val in zip(data, max_values)]
 
         # レーダーチャートの描画
         angles = np.linspace(0, 2 * np.pi, len(labels), endpoint=False).tolist()
-        data = normalize_data(selected_data, max_values) + [selected_data[0] / max_values[0]]
+        data = normalize_data(total_nutrients, max_values) + [total_nutrients[0] / max_values[0]]
         g_data = normalize_data(goal_data, max_values) + [goal_data[0] / max_values[0]]
         angles += angles[:1]
 
@@ -320,13 +308,14 @@ def view_mockup():
             st.write(f"鉄 (mg): {total_iron} / {goal_data[3]}")
 
         if not best_menu is None:
+            st.write(best_menu)
             indices = np.where(best_menu == 1)[0]
             st.write(indices)
             selected_rows = df_read.iloc[indices]
             st.write(selected_rows)
             selected_rows_sum = selected_rows.iloc[:, 2:].sum()
             st.write(selected_rows_sum)
-            selected_data = [selected_rows_sum[0], selected_rows_sum[1], selected_rows_sum[2], selected_rows_sum[3]]
+            XXXXXXXXXXXXtotal_nutrients = [selected_rows_sum[0], selected_rows_sum[1], selected_rows_sum[2], selected_rows_sum[3]]
             st.write(selected_data)
             data2 = normalize_data(selected_data, max_values) + [selected_data[0] / max_values[0]]
             st.write(data2)
