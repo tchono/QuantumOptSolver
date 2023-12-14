@@ -315,7 +315,6 @@ def view_mockup():
             total_nutrients2 = selected_rows.iloc[:, 2:].sum()
             total_nutrients2 = list(total_nutrients2.values)
             data2 = normalize_data(total_nutrients2, max_values) + [total_nutrients2[0] / max_values[0]]
-            st.write(data2)
 
             # レーダーチャートの描画
             plt.figure()
