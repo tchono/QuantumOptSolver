@@ -276,7 +276,7 @@ def view_mockup():
             return [d / max_val for d, max_val in zip(data, max_values)]
 
         # レーダーチャートの描画
-        angles = np.linspace(0, 2 * np.pi, len(labels), endpoint=True).tolist()
+        angles = np.linspace(0, 2 * np.pi, len(labels), endpoint=False).tolist()
         data = normalize_data(total_nutrients, max_values) + [total_nutrients[0] / max_values[0]]
         g_data = normalize_data(goal_data, max_values) + [goal_data[0] / max_values[0]]
         angles += angles[:1]
