@@ -150,7 +150,7 @@ def plot_solution(coord: dict, title: str, best_tour: dict = dict()):
 def view_mockup():
 
     # セレクトボックス（メインメニュー）
-    menu = ['【選択してください】', '配送最適化', '献立最適化']
+    menu = ['【選択してください】', '配送最適化', '献立最適化', '従業員割当問題']
     choice = st.sidebar.selectbox('モードを選択してください', menu)
 
     if menu.index(choice) == 0:
@@ -344,6 +344,21 @@ def view_mockup():
                 st.write("■ 合計 ■")
                 for i in range(len(labels)):
                     st.write(f"{labels[i]}: {total_nutrients2[i]} / {goal_data[i]}")
+
+    if menu.index(choice) == 3:
+        st.title(menu[3])
+        # 画像のパス
+        image_path = "assets/image/EmployeeAssignmentProblem.png"
+        # 画像を表示
+        st.image(image_path, use_column_width=True)
+        st.write('従業員割当問題とは、各従業員の役職やスキル、希望勤務地と、日々変動する多種多様な業務を考慮して、各店舗に適切に従業員を割り当てる問題です。')
+        st.write('このデモで取り扱う従業員割当問題は、役職やスキルの種類やレベル、役割や希望勤務地に応じた適切な割り当てを行い、各店舗における業務の効率化と店舗間・従業員間の業務量の平準化を目的としています。')
+        st.write('従業員割当問題の具体的な応用先として、')
+        st.write('・　店舗スタッフの適切な配置と業務割り当て')
+        st.write('・　製造業における工場ラインでの作業員配置と役割分担の決定')
+        st.write('・　サービス業におけるレセプションやカスタマーサポートスタッフの日々のスケジュール管理')
+        st.write('などがあります。')
+        st.markdown("---")
 
 
 
