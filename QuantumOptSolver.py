@@ -276,7 +276,7 @@ def view_mockup():
             return [d / max_val for d, max_val in zip(data, max_values)]
 
         # レーダーチャートの描画
-        angles = np.linspace(0, 2 * np.pi, len(labels) + 1, endpoint=True).tolist()
+        angles = np.linspace(0, 2 * np.pi, len(labels), endpoint=False).tolist()
         data = normalize_data(total_nutrients, max_values) + [total_nutrients[0] / max_values[0]]
         g_data = normalize_data(goal_data, max_values) + [goal_data[0] / max_values[0]]
         angles += angles[:1]
@@ -287,6 +287,8 @@ def view_mockup():
         ax.set_yticklabels([])
         ax.set_xticks(angles[:-1])
         ax.set_xticklabels(labels)
+        ax.set_thetagrids(angles[:-1] * 180 / np.pi, labels)  
+        ax.set_theta_zero_location('N')
 
         # タイトルを設定
         ax.set_title('栄養素比較')
